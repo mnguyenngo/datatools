@@ -5,16 +5,20 @@ import datetime as dt
 class Controller(object):
     """Class object to manage and log data cleaning processes
 
-        After using the controller, syntax to get X and y would be:
+    After using the controller, syntax to get X and y would be:
         X = controller.features
         y = controller.target
 
-        OR
-
-        Xtrain, Xtest, ytrain, ytest = controller.train_test_split()
     """
 
     def __init__(self, raw_data, target=None):
+        """Initializes Controller class object
+
+        Arguments:
+            raw_data (dataframe)
+            target (string): name of the column of the target variable
+                if None: user has to run extract_target() method
+        """
         self.raw_data = raw_data
         self._created_date = dt.datetime.today()
         self.log = None
@@ -41,7 +45,9 @@ class Controller(object):
         for col in columns:
             self.log[col] = []
 
-    def record(self, f, **kwargs):
+    def record(self, f, optional_notes="", **kwargs):
+        """Records the function and optional notes that is run on the features
+        """
         orig_features = self.features.copy()
         orig_columns = orig_features.columns
         mod_features = f(**kwargs)
@@ -49,22 +55,23 @@ class Controller(object):
         orig_and_mod = [col for col in orig_columns if col in mod_columns]
         # check if number of columns has changed
         if len(mod_columns) != len(orig_columns):
-            print('columns added')
             # check if columns have been added
             if len(mod_columns) > len(orig_columns):
                 for col in mod_columns:
                     if col not in orig_columns:
                         # self.log[col] = []
-                        self.log[col] = ["Added by {}".format(f.__name__)]
+                        self.log[col] = [f"Added by {f.__name__}; "
+                                         f"{optional_notes}"]
             # check if columns have been dropped
             else:
                 for col in orig_columns:
                     if col not in mod_columns:
-                        self.log[col].append("Deleted by {}"
-                                             .format(f.__name__))
+                        self.log[col].append(f"Deleted by {f.__name__}; "
+                                             f"{optional_notes}")
 
         # check if columns have been modified
         for col in orig_and_mod:
             if not orig_features[col].equals(mod_features[col]):
-                self.log[col].append("Modified by {}".format(f.__name__))
-        self.features = mod_features
+                self.log[col].append(f"Modified by {f.__name__}; "
+                                     f"{optional_notes}")
+        # self.features = mod_features
