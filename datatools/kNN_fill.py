@@ -1,3 +1,6 @@
+from sklearn.model_selection import train_test_split
+import pandas as pd
+
 def kNN_fill(X, y, dtype='categorical'):
     """Returns y with missing values filled based on kNN
     
