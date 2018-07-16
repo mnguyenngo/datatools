@@ -11,6 +11,7 @@ z_score = {0.70: 1.04,
            0.9999: 3.89,
            0.99999: 4.42}
 
+
 def min_sample_size(CI=0.95, MOE=0.05):
     """Calculates the minimum sample size when given the confidence interval
     and margin of error.
