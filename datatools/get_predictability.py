@@ -18,7 +18,7 @@ def get_predictability(X, y, dtype='continuous'):
         Note: X and y must be equal in column length 
         
     Returns:
-        None
+        results (dataframe)
     """   
     M = pd.concat([X, y], axis=1)
     fortrain = M.dropna()
@@ -57,15 +57,32 @@ def get_predictability(X, y, dtype='continuous'):
     print("Fitting kNN model")
     kN.fit(X_train, y_train)
     
+    # get the r2 score for each model
     mean_score = r2_score(y_test, y_pred_mean)
     median_score = r2_score(y_test, y_pred_median)
     mode_score = r2_score(y_test, y_pred_mode)
-    
     lm_score = lm.score(X_test, y_test)
     rf_score = rf.score(X_test, y_test)
     kN_score = kN.score(X_test, y_test)
     
+    # get the mse for each model
+    mean_mse = mean_squared_error(y_test, y_pred_mean)
+    median_mse = mean_squared_error(y_test, y_pred_median)
+    mode_mse = mean_squared_error(y_test, y_pred_mode)
+    
+    lm_y_pred = lm.predict(X_test)
+    rf_y_pred = rf.predict(X_test)
+    kN_y_pred = kN.predict(X_test)
+    lm_mse = mean_squared_error(y_test, lm_y_pred)
+    rf_mse = mean_squared_error(y_test, rf_y_pred)
+    kN_mse = mean_squared_error(y_test, kN_y_pred)
+    
+    # construct the dataframe to return to the user
     names = ['mean', 'median', 'mode', 'LinearRegression', 'RandomForestRegressor', 'KNeighborsRegressor']
     scores = [mean_score, median_score, mode_score, lm_score, rf_score, kN_score]
+    losses = [mean_mse, median_mse, mode_mse, lm_mse, rf_mse, kN_mse]
     
-    print([(names[idx], score) for idx, score in enumerate(scores)])
+    results = pd.DataFrame(data=list(zip(names, scores, losses)), columns=['names', 'r2 score', 'loss'])
+    results['r2 score'] = results['r2 score'].apply(lambda x: round(x, 0))
+    results['loss'] = results['loss'].apply(lambda x: round(x, 0))
+    return results
